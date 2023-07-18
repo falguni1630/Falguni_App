@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+table {
+  border-collapse: collapse;
+  width: 50%;
+}
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+tr:nth-child(even){background-color: #f2f2f2}
+th {
+  background-color: #04AA6D;
+  color: white;
+}
+
+   .content {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+ <div class="content">
+      {% for x in mycustomer %}
+        <h3>Welcome, {{ x.firstname }}!</h3>
+        <h4>You are successfully logged in.</h4>
+      {% endfor %}
+        <h3>Welcome to ABC Bank!</h3>
+ </div>
+
+ <div class="content">
+
+
+    </div>
+   <div class="content">
+<table border='1'>
+  <tr>
+    <th>Account Number</th>
+    <th>Account Type</th>
+    <th>Account Balance</th>
+
+  </tr>
+  {% for x in myaccount %}
+    <tr>
+      <td>{{ x.account_number }}</td>
+      <td>{{ x.account_type }}</td>
+      <td>{{ x.balance }}</td>
+
+    </tr>
+  {% endfor %}
+</table>
+<table border='1'>
+  <tr>Transaction History  </tr>
+  <tr>
+    <th>Type</th>
+    <th>Amount</th>
+    <th>Timestamp</th>
+
+  </tr>
+  {% for transaction in mytransaction %}
+    <tr>
+       <td> {{ transaction.transaction_type }} </td>
+       <td>Amount: {{ transaction.transaction_amount }} </td>
+       <td>{{ transaction.transaction_date }} </td>
+    </tr>
+  {% empty %}
+    <li>No transactions found.</li>
+  {% endfor %}
+<</table>
+
+
+ </div>
+</body>
+</html>

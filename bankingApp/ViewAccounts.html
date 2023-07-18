@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Accounts</title>
+   <style>
+        /* CSS for the header and buttons */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+        .header {
+            background-color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .bank-name {
+            font-size: 24px;
+            color: #0000ff;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .regular-button {
+            background-color: lightblue;
+            color: black;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+      .signout-button {
+            background-color: #0000ff;
+            color: #ffffff;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+ .signout-button:hover {
+            background-color: #0000ff;
+            color: #ffffff;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .regular-button:hover {
+            transform: scale(1.1); /* Increase button size on hover */
+        }
+
+        .regular-button:hover a {
+            font-weight: bold; /* Make text bold on hover */
+        }
+.signout-button a {
+            color: #ffffff; /* Set text color to white */
+            text-decoration: none; /* Remove underline from links */
+        }
+        .regular-button a {
+            color: black; /* Set text color to white */
+            text-decoration: none; /* Remove underline from links */
+        }
+
+        /* Center the content */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .content {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+
+ <div class="content">
+        {% if user.is_authenticated %}
+        <h3>Welcome, {{ user.first_name }}!</h3>
+        <h4>You are successfully logged in.</h4>
+        {% else %}
+        <h3>Welcome to ABC Bank!</h3>
+        <p>Please sign up or log in to continue.</p>
+        {% endif %}
+    </div>
+    <div class="button-container">
+
+        <button class="regular-button" type="submit">
+            <a href="/account_details">Cheqing Account</a>
+        </button>
+      <button class="regular-button" type="submit">
+            <a href="/signout">Saving Account</a>
+        </button>
+      <button class="regular-button" type="submit">
+            <a href="/signout">Credit Card Account</a>
+        </button>
+      <button class="regular-button" type="submit">
+            <a href="/signout">Loan Account</a>
+        </button>
+
+    </div>
+    <div class="button-container">
+        {% if user.is_authenticated %}
+        <button class="signout-button" type="submit">
+            <a href="/signout">Sign Out</a>
+        </button>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
