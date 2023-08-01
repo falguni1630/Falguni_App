@@ -1,14 +1,14 @@
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.template import loader
-
-from .models import Customer, Account
-from .models import Check
+from django.core.paginator import Paginator
+from bankingApp.models import Account, Check, Customer, Saving, CreditCard
 from django.contrib import messages
 import time
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
+
 
 
 # Create your views here.
@@ -67,40 +67,219 @@ def login(request):
         password = request.POST['password']
 
         user = authenticate(username=username, password=password)
-
+        request.session['username'] = username
         if user is not None:
             auth_login(request, user)
             first_name = user.first_name
 
-            return render(request, 'bankingApp/ViewAccounts.html', {'first_name': first_name})
+            # Chequing Account Details
+            c_account = Account.objects.get(account_type="Chequing",
+                                            customer_id=(
+                                                Customer.objects.get(username=request.session['username'])).customer_id)
+            c_accNum = c_account.account_number
+            transactions = Check.objects.filter(account_number=c_accNum)
+
+            # set the account balance to the sum of all transactions and the initial balance
+
+            var_balance = 0
+            for transaction in transactions:
+                if transaction.transaction_type == 'Credit':
+                    var_balance += transaction.transaction_amount
+                elif transaction.transaction_type == 'Debit':
+                    var_balance -= transaction.transaction_amount
+
+            c_account.balance = var_balance
+
+            # Saving Account Details
+            s_account = Account.objects.get(account_type="Saving",
+                                            customer_id=(
+                                                Customer.objects.get(username=request.session['username'])).customer_id)
+            s_accNum = s_account.account_number
+            transactions = Saving.objects.filter(account_number=s_accNum)
+
+            # set the account balance to the sum of all transactions and the initial balance
+
+            balance = s_account.balance
+            var_balance = 0
+            for transaction in transactions:
+                if transaction.transaction_type == 'Credit':
+                    var_balance += transaction.transaction_amount
+                elif transaction.transaction_type == 'Debit':
+                    var_balance -= transaction.transaction_amount
+
+            s_account.balance = var_balance
+
+            return render(request, 'bankingApp/ViewAccounts.html',
+                          {'first_name': first_name,
+                           'checking_account_num': c_accNum,
+                           'checking_account_balance': c_account.balance,
+                           'saving_account_num': s_accNum,
+                           'saving_account_balance': s_account.balance})
 
         else:
             messages.error(request, 'Invalid credentials!')
-            return redirect('dashboard')
+            return redirect('login')
 
     return render(request, 'bankingApp/login.html')
 
 
 def signout(request):
     logout(request)
+    request.session['username'] = ""
     messages.success(request, 'Logged out successfully!')
     return redirect('dashboard')
 
 
 def account_details(request):
-    var_customer = Customer.objects.filter(username='arhat1').values()
-    var_cust_id=var_customer[0]['customer_id']
-    var_account = Account.objects.filter(customer_id_id=var_cust_id).values()
-    var_acc_num = var_account[0]['account_number']
-    var_transaction = Check.objects.filter(account_number=var_acc_num).values()
-    template = loader.get_template('bankingApp/ChequingAcct.html')
-    context = {
-        'mycustomer': var_customer,
-        'myaccount': var_account,
-        'mytransaction':var_transaction
-            }
-    return HttpResponse(template.render(context, request))
+    # Chequing Account Details
 
-# Cust_Id =""
-# account = Check.objects.get(account_number=account_number)
-# return render(request, 'bankingApp/ChequingAcct.html', {'account': account})
+    c_account = Account.objects.get(account_type="Chequing",
+                                    customer_id=(
+                                        Customer.objects.get(username=request.session['username'])).customer_id)
+    c_accNum = c_account.account_number
+    transactions = Check.objects.filter(account_number=c_accNum)
+
+    # set the account balance to the sum of all transactions and the initial balance
+
+    balance = c_account.balance
+    var_balance = 0
+    for transaction in transactions:
+        if transaction.transaction_type == 'Credit':
+            var_balance += transaction.transaction_amount
+        elif transaction.transaction_type == 'Debit':
+            var_balance -= transaction.transaction_amount
+
+    c_account.balance = var_balance
+
+    # Saving Account Details
+    s_account = Account.objects.get(account_type="Saving",
+                                    customer_id=(
+                                        Customer.objects.get(username=request.session['username'])).customer_id)
+    s_accNum = s_account.account_number
+    transactions = Saving.objects.filter(account_number=s_accNum)
+
+    # set the account balance to the sum of all transactions and the initial balance
+
+    balance = s_account.balance
+    var_balance = 0
+    for transaction in transactions:
+        if transaction.transaction_type == 'Credit':
+            var_balance += transaction.transaction_amount
+        elif transaction.transaction_type == 'Debit':
+            var_balance -= transaction.transaction_amount
+
+    s_account.balance = var_balance
+    """
+            saving_acc = Account.objects.get(account_type="Saving", customer_id=(
+                Customer.objects.get(username=request.session['username'])).customer_id)
+            saving_account_num = saving_acc.account_number
+            saving_account_balance = saving_acc.balance
+
+            saving_transactions = Saving.objects.filter(account_number=saving_account_num)
+            for transaction in saving_transactions:
+                if transaction.transaction_type == 'credit':
+                    saving_account_balance += transaction.transaction_amount
+                elif transaction.transaction_type == 'debit':
+                    saving_account_balance -= transaction.transaction_amount
+            """
+    return render(request, 'bankingApp/ViewAccounts.html',
+                  {
+                      'checking_account_num': c_accNum,
+                      'checking_account_balance': c_account.balance,
+                      'saving_account_num': s_accNum,
+                      'saving_account_balance': s_account.balance})
+
+
+# Chequing Account Transaction  Details
+
+# New transaction - Credit Amount
+def credit_money(request):
+    if request.method == 'POST':
+        amount = float(request.POST['amount'])
+        description = request.POST['description']
+        date = request.POST['date']
+        account = Account.objects.get(account_type="Chequing",
+                                      customer_id=(
+                                          Customer.objects.get(username=request.session['username'])).customer_id)
+        account.balance += amount
+        account.save()
+        new_trans = Check(account_number=account, transaction_amount=amount,
+                          transaction_type='Credit', transaction_desc='description',
+                          transaction_date='date')
+        new_trans.save()
+      
+        return redirect('bankingApp/SampleChequing.html')
+
+    return render(request, 'bankingApp/SampleChequing.html')
+ 
+
+def checkingaccount(request):
+    account = Account.objects.get(account_type="Chequing",
+                                  customer_id=(Customer.objects.get(username=request.session['username'])).customer_id)
+    accNum = account.account_number
+    if request.method == "POST":
+        fromdate = request.POST.get('fromDate')
+        todate = request.POST.get('toDate')
+        searchResult = Check.objects.filter(transaction_date__gte=fromdate, transaction_date__lte=todate,
+                                            account_number=accNum)
+        return render(request, 'bankingApp/SampleChequing.html', {'account': account, 'var_trans': searchResult})
+    else:
+        transactions = Check.objects.filter(account_number=accNum)
+
+        # var_tran_id = transactions.transaction_id
+        # set the account balance to the sum of all transactions and the initial balance
+
+        balance = account.balance
+        var_balance = 0
+        for transaction in transactions:
+            if transaction.transaction_type == 'Credit':
+                var_balance += transaction.transaction_amount
+            elif transaction.transaction_type == 'Debit':
+                var_balance -= transaction.transaction_amount
+
+        account.balance = var_balance
+        account.save()
+
+        # SET PAGINATION
+
+        p = Paginator(transactions, 5)
+        page = request.GET.get('page')
+        var_trans = p.get_page(page)
+
+        return render(request, 'bankingApp/SampleChequing.html',
+                      {'account': account, 'transactions': transactions, 'var_trans': var_trans})
+
+
+# Saving Account Transaction Details
+def savingsaccount(request):
+    account = Account.objects.get(account_type="Saving",
+                                  customer_id=(Customer.objects.get(username=request.session['username'])).customer_id)
+    accNum = account.account_number
+    accInterest = account.interest_rate / 12
+    monthly_interest = (account.balance * accInterest) / 100
+    if request.method == "POST":
+        fromdate = request.POST.get('fromDate')
+        todate = request.POST.get('toDate')
+        searchResult = Saving.objects.filter(transaction_date__gte=fromdate, transaction_date__lte=todate,
+                                             account_number=accNum)
+        return render(request, 'bankingApp/Saving.html', {'account': account, 'transactions': searchResult})
+    else:
+        transactions = Saving.objects.filter(account_number=accNum)
+
+        # set the account balance to the sum of all transactions and the initial balance
+
+        balance = account.balance
+        var_balance = 0
+        for transaction in transactions:
+            if transaction.transaction_type == 'Credit':
+                var_balance += transaction.transaction_amount
+            elif transaction.transaction_type == 'Debit':
+                var_balance -= transaction.transaction_amount
+
+        account.balance = var_balance
+        account.save()
+
+        # Calculate Interest on monthly basis
+
+        return render(request, 'bankingApp/Saving.html',
+                      {'account': account, 'transactions': transactions, 'monthly_interest': monthly_interest})

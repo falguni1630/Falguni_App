@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+table {
+  border-collapse: collapse;
+  width: 50%;
+}
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+tr:nth-child(even){background-color: #f2f2f2}
+th {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.content {
+     text-align: center;
+     margin-bottom: 20px;
+    }
+  .button-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+    .regular-button {
+            background-color: #0000ff;
+            color: #ffffff;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .regular-button:hover {
+            transform: scale(1.1); /* Increase button size on hover */
+        }
+
+        .regular-button:hover a {
+            font-weight: bold; /* Make text bold on hover */
+        }
+
+        .regular-button a {
+            color: #ffffff; /* Set text color to white */
+            text-decoration: none; /* Remove underline from links */
+        }
+
+
+    </style>
+</head>
+<body>
+
+ <div class="content">
+      {% for x in mycustomer %}
+        <h3>Welcome, {{ x.firstname }}!</h3>
+        <h4>You are successfully logged in.</h4>
+      {% endfor %}
+        <h3>Welcome to ABC Bank!</h3>
+ </div>
+
+ <div class="content">
+
+
+    </div>
+ <div  >
+    <h3 style="text-align: left;">Account Details</h3>
+
+ </div>
+
+   <div class="content">
+<table border='1'>
+  <tr>
+    <th>Account Number</th>
+    <th>Account Type</th>
+    <th>Account Balance</th>
+    <th>Date Opened</th>
+    <th>Overdraft Limit</th>
+    <th>Interest Rate</th>
+
+   </tr>
+     {% for x in myaccount %}
+
+    <tr>
+      <td>{{ x.account_number }}</td>
+      <td><a href = "{% url 'ChequingAccounts' x.account_number %}">{{ x.account_type }}</a></td>
+      <td>{{ x.balance }}</td>
+      <td>{{ x.date_opened }}</td>
+      <td>{{ x.overdraft_lim }}</td>
+      <td>{{ x.interest_rate }}%</td>
+    </tr>
+
+   {% endfor %}
+</table>
+<div  >
+    <h3 style="text-align: left;">Transaction History</h3>
+
+ </div>
+
+ <table border='1'>
+
+         {% if  request.session.acctype  != 'Credit Card'  %}
+
+              <tr>
+                <th>Transaction Description</th>
+                <th>Transaction Type</th>
+                <th>Transaction Amount</th>
+                <th>Date</th>
+              </tr>
+              {% for transaction in mytransaction %}
+               <tr>
+                  <td> {{ transaction.transaction_desc }} </td>
+                  <td> {{ transaction.transaction_type }} </td>
+                  <td>{{ transaction.transaction_amount }} </td>
+                  <td>{{ transaction.transaction_date }} </td>
+               </tr>
+              {% empty %}
+                <li>No transactions found.</li>
+              {% endfor %}
+         {% else %}
+
+             <tr>
+             <th>Transaction Description</th>
+             <th>Transaction Amount</th>
+             <th>Date</th>
+             <th>Last Payment Date</th>
+             <th>Minimum Amount Due</th>
+             </tr>
+              {% for transaction in mytransaction %}
+               <tr>
+                  <td> {{ transaction.transaction_desc }} </td>
+                  <td>{{ transaction.transaction_amount }} </td>
+                  <td>{{ transaction.transaction_date }} </td>
+                  <td> {{ transaction.last_payment_date }} </td>
+                  <td> {{ transaction.minimum_payment }} </td>
+               </tr>
+              {% empty %}
+                <li>No transactions found.</li>
+              {% endfor %}
+        {% endif %}
+
+
+</table>
+</div>
+<div class="button-container">
+        <button class="regular-button" type="submit">
+            <a href="/signout">Sign Out</a>
+        </button>
+
+ </div>
+</body>
+</html>

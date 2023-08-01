@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+                .dropbtn {
+          background-color: #04AA6D;
+          color: white;
+          padding: 8px;
+          font-size: 16px;
+          border: none;
+        }
+
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: #f1f1f1;
+          min-width: 160px;
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+          z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+          color: black;
+          padding: 6px 8px;
+          text-decoration: none;
+          display: block;
+        }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover {background-color: #ddd;}
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {display: block;}
+
+        /* Change the background color of the dropdown button when the dropdown content is shown */
+        .dropdown:hover .dropbtn {background-color: #3e8e41;}
+
+        .pagination a {
+          color: black;
+          float: left;
+          padding: 8px 16px;
+          text-decoration: none;
+          transition: background-color .3s;
+        }
+
+
+        .pagination a.active {
+          background-color: dodgerblue;
+          color: white;
+        }
+
+
+        .pagination a:hover:not(.active) {background-color: #ddd;}
+        table {
+          border-collapse: collapse;
+          width: 50%;
+        }
+        th, td {
+          text-align: left;
+          padding: 8px;
+        }
+        tr:nth-child(even){background-color: #f2f2f2}
+        th {
+          background-color: #04AA6D;
+          color: white;
+        }
+
+        input[type=submit] {
+            width: 10%;
+            background-color: lightblue;
+            color: black;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+}
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checking Account</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <form method="POST">
+            {% csrf_token %}
+            <h3>Checking Account</h3>
+            <h4>Balance: ${{ account.balance }}</h4>
+            <h4>Transaction Details</h4>
+            From : <input type="date" name="fromDate"required />
+            To : <input type="date" name="toDate"required />
+            <input type="submit" name="Search"/>
+            <hr/>
+            <table id= "table_id" class="table">
+                <thead>
+                <tr>
+                    <th>Transaction Description</th>
+                    <th>Transaction Type</th>
+                    <th>Transaction Amount</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for transaction in var_trans %}
+                   <tr>
+                      <td> {{ transaction.transaction_desc }} </td>
+                      <td> {{ transaction.transaction_type }} </td>
+                      <td>{{ transaction.transaction_amount }} </td>
+                      <td>{{ transaction.transaction_date }} </td>
+                   </tr>
+                </tbody>
+                  {% empty %}
+                    <li>No transactions found.</li>
+                  {% endfor %}
+                <!--
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+
+                <tr>
+                    <th>Transaction Description</th>
+                    <th>Transaction Type</th>
+                    <th>Transaction Amount</th>
+                    <th>Date</th>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.transaction_date }}</td>
+                        <td>{{ transaction.transaction_desc }}</td>
+                        <td>{{ transaction.transaction_amount }}</td>
+                    </tr>
+                    {% endfor %}
+                    -->
+                </tbody>
+            </table>
+        </form>
+        <hr><br/><br/>
+
+            {% if var_trans.has_previous %}
+                <a href="?page=1">&laquo First </a>
+                <a href="?page = {{ var_trans.previous_page_number }}"> Previous </a>
+            {% endif %}
+
+            Page {{ var_trans.number }} of {{ var_trans.paginator.num_pages }}
+
+            {% if var_trans.has_next %}
+                <a href="?page={{ var_trans.next_page_number }}"> Next </a>
+                <a href="?page={{ var_trans.paginator.num_pages }}"> Last &raquo</a>
+            {% endif %}
+
+        <br/>
+         <p>Back to <a href="{% url 'account_details' %}"> home</a></p>
+        <!--
+        <p>Back to <a href="bankingApp/ViewAccounts.html"> home</a></p>
+        -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- needed to use moment.js for our date sorting
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.19/sorting/datetime-moment.js"></script>
+    -->
+</body>
+</html>

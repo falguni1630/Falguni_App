@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+     <form method="POST">
+            {% csrf_token %}
+            <h3>Checking Account</h3>
+            <label for="amount">Amount:</label>
+            <input type="number" name="amount" >
+            <label for="description">Description:</label>
+            <input type="description" name="description">
+            <label for="date">Date:</label>
+            <input type="date" name="date"/>
+            <div class="button">
+                <input type="radio",id="radCredit",name="transaction",value="Credit">
+                <label for="radCredit">Credit</label>
+                <input type="radio",id="radDebit",name="transaction",value="Debit">
+                <label for="radDebit">Debit</label>
+            </div>
+            <input type="submit" name="Search"/>
+     </form>
+</body>
+</html>
